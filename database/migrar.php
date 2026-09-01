@@ -35,6 +35,30 @@ foreach ($equivalencias as $propia => $railway) {
 $esSqlite = Config::get('DB_SQLITE') !== null && Config::get('DB_SQLITE') !== '';
 $esquema = __DIR__ . ($esSqlite ? '/schema.sqlite.sql' : '/schema.sql');
 
+// Diagnóstico: sin esto, un fallo de conexión no dice qué falta.
+$host = Config::get('DB_HOST');
+$nombre = Config::get('DB_NAME');
+$usuario = Config::get('DB_USER');
+$clave = Config::get('DB_PASSWORD');
+
+printf(
+    "Configuración detectada: host=%s puerto=%s bd=%s usuario=%s contraseña=%s
+",
+    $host ?? '(vacío)',
+    Config::get('DB_PORT') ?? '(vacío)',
+    $nombre ?? '(vacío)',
+    $usuario ?? '(vacío)',
+    $clave === null || $clave === '' ? '(vacía)' : '(definida)',
+);
+
+if ($host === null || $host === '') {
+    fwrite(STDERR, "No hay host de base de datos configurado.
+");
+    fwrite(STDERR, "Añade las variables del servicio MySQL al servicio de la aplicación.
+");
+    exit(1);
+}
+
 try {
     $pdo = Database::conexion();
 
