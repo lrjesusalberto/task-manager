@@ -44,6 +44,50 @@ final class Config
         'DB_PASSWORD' => ['MYSQLPASSWORD', 'MYSQL_PASSWORD'],
     ];
 
+    /**
+     * Algunos proveedores dan la conexión completa en una URL
+     * (mysql://usuario:clave@host:puerto/base). Si existe, tiene
+     * prioridad: es la que garantiza la conectividad entre servicios.
+     *
+     * @return array<string, string>
+     */
+    private static function desdeUrl(): array
+    {
+        static $partes = null;
+
+        if ($partes !== null) {
+            return $partes;
+        }
+
+        $partes = [];
+
+        foreach (['MYSQL_URL', 'DATABASE_URL', 'MYSQL_PUBLIC_URL'] as $variable) {
+            $url = getenv($variable);
+
+            if ($url === false || $url === '') {
+                continue;
+            }
+
+            $componentes = parse_url($url);
+
+            if (!is_array($componentes) || !isset($componentes['host'])) {
+                continue;
+            }
+
+            $partes = array_filter([
+                'DB_HOST'     => $componentes['host'] ?? null,
+                'DB_PORT'     => isset($componentes['port']) ? (string) $componentes['port'] : null,
+                'DB_NAME'     => isset($componentes['path']) ? ltrim($componentes['path'], '/') : null,
+                'DB_USER'     => isset($componentes['user']) ? urldecode($componentes['user']) : null,
+                'DB_PASSWORD' => isset($componentes['pass']) ? urldecode($componentes['pass']) : null,
+            ], static fn ($valor): bool => $valor !== null && $valor !== '');
+
+            break;
+        }
+
+        return $partes;
+    }
+
     public static function get(string $clave, ?string $porDefecto = null): ?string
     {
         // El entorno manda sobre el .env: en producción no hay archivo.
@@ -59,6 +103,12 @@ final class Config
             if ($valor !== false && $valor !== '') {
                 return $valor;
             }
+        }
+
+        $deUrl = self::desdeUrl();
+
+        if (isset($deUrl[$clave])) {
+            return $deUrl[$clave];
         }
 
         return self::$valores[$clave] ?? $porDefecto;
