@@ -3,6 +3,8 @@
 Gestor de tareas con **API REST en PHP** y base de datos **MySQL**. El backend expone endpoints
 JSON y el frontend los consume con `fetch`, sin recargar la página.
 
+**Demo:** https://task-manager-production-2713.up.railway.app
+
 ## Qué hace
 
 - **CRUD completo de tareas**: crear, listar, ver, editar, completar y eliminar.
