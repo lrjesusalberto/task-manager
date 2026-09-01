@@ -32,6 +32,18 @@ final class Config
         self::$valores = $valores;
     }
 
+    /**
+     * Nombres que usan algunos proveedores para las credenciales de MySQL.
+     * Railway, por ejemplo, expone MYSQLHOST en lugar de DB_HOST.
+     */
+    private const ALIAS = [
+        'DB_HOST'     => ['MYSQLHOST', 'MYSQL_HOST'],
+        'DB_PORT'     => ['MYSQLPORT', 'MYSQL_PORT'],
+        'DB_NAME'     => ['MYSQLDATABASE', 'MYSQL_DATABASE'],
+        'DB_USER'     => ['MYSQLUSER', 'MYSQL_USER'],
+        'DB_PASSWORD' => ['MYSQLPASSWORD', 'MYSQL_PASSWORD'],
+    ];
+
     public static function get(string $clave, ?string $porDefecto = null): ?string
     {
         // El entorno manda sobre el .env: en producción no hay archivo.
@@ -39,6 +51,14 @@ final class Config
 
         if ($delEntorno !== false && $delEntorno !== '') {
             return $delEntorno;
+        }
+
+        foreach (self::ALIAS[$clave] ?? [] as $alternativa) {
+            $valor = getenv($alternativa);
+
+            if ($valor !== false && $valor !== '') {
+                return $valor;
+            }
         }
 
         return self::$valores[$clave] ?? $porDefecto;

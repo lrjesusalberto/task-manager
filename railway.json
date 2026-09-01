@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "php -S 0.0.0.0:${PORT:-8080} -t public public/router.php",
+    "startCommand": "php database/migrar.php && php -S 0.0.0.0:${PORT:-8080} -t public public/router.php",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
   }
