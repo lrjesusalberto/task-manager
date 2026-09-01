@@ -2,4 +2,13 @@
 providers = ["php"]
 
 [phases.setup]
-nixPkgs = ["php84", "php84Extensions.pdo_mysql"]
+# MySQL 8 autentica por defecto con caching_sha2_password. mysqlnd solo sabe
+# negociar ese metodo si PHP lleva openssl y sodium; sin ellos la conexion
+# falla con "authentication method unknown to the client [caching_sha2_password]".
+nixPkgs = [
+  "php84",
+  "php84Extensions.pdo_mysql",
+  "php84Extensions.mysqli",
+  "php84Extensions.openssl",
+  "php84Extensions.sodium",
+]

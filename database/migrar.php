@@ -51,6 +51,16 @@ printf(
     $clave === null || $clave === '' ? '(vacía)' : '(definida)',
 );
 
+// Sin openssl, mysqlnd no negocia caching_sha2_password (el metodo por
+// defecto de MySQL 8) y la conexion muere en el handshake.
+printf(
+    "Extensiones: pdo=%s openssl=%s sodium=%s
+",
+    implode(',', PDO::getAvailableDrivers()),
+    extension_loaded('openssl') ? 'si' : 'NO',
+    extension_loaded('sodium') ? 'si' : 'NO',
+);
+
 if ($host === null || $host === '') {
     fwrite(STDERR, "No hay host de base de datos configurado.
 ");
