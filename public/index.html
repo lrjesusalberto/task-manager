@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Manager</title>
+    <meta
+      name="description"
+      content="Gestor de tareas con API REST en PHP y MySQL. Crear, editar, completar y filtrar tareas por estado, prioridad y categoría."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="/assets/estilos.css" />
+  </head>
+  <body>
+    <header class="cabecera">
+      <div class="cabecera__interior">
+        <h1 class="cabecera__titulo">Task Manager</h1>
+        <p class="cabecera__resumen" id="resumen" aria-live="polite"></p>
+      </div>
+    </header>
+
+    <main class="contenido">
+      <!-- Alta de tareas -->
+      <section class="bloque" aria-labelledby="titulo-nueva">
+        <h2 class="bloque__titulo" id="titulo-nueva">Nueva tarea</h2>
+
+        <form class="formulario" id="form-tarea" novalidate>
+          <input type="hidden" id="tarea-id" />
+
+          <div class="campo campo--ancho">
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" name="titulo" maxlength="160" required />
+            <p class="campo__error" id="error-titulo"></p>
+          </div>
+
+          <div class="campo campo--ancho">
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" name="descripcion" rows="2"></textarea>
+          </div>
+
+          <div class="campo">
+            <label for="prioridad">Prioridad</label>
+            <select id="prioridad" name="prioridad">
+              <option value="baja">Baja</option>
+              <option value="media" selected>Media</option>
+              <option value="alta">Alta</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="categoria">Categoría</label>
+            <select id="categoria" name="categoria_id">
+              <option value="">Sin categoría</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="vence">Vence el</label>
+            <input type="date" id="vence" name="vence_el" />
+            <p class="campo__error" id="error-vence_el"></p>
+          </div>
+
+          <div class="formulario__acciones">
+            <button class="boton boton--principal" type="submit" id="btn-guardar">
+              Añadir tarea
+            </button>
+            <button class="boton" type="button" id="btn-cancelar" hidden>Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Filtros -->
+      <section class="bloque" aria-labelledby="titulo-filtros">
+        <h2 class="bloque__titulo" id="titulo-filtros">Filtros</h2>
+
+        <div class="filtros">
+          <div class="campo">
+            <label for="filtro-estado">Estado</label>
+            <select id="filtro-estado">
+              <option value="todas">Todas</option>
+              <option value="pendientes">Pendientes</option>
+              <option value="completadas">Completadas</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="filtro-prioridad">Prioridad</label>
+            <select id="filtro-prioridad">
+              <option value="">Cualquiera</option>
+              <option value="alta">Alta</option>
+              <option value="media">Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="filtro-categoria">Categoría</label>
+            <select id="filtro-categoria">
+              <option value="">Todas</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="filtro-buscar">Buscar</label>
+            <input type="search" id="filtro-buscar" placeholder="Título de la tarea…" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Listado -->
+      <section class="bloque" aria-labelledby="titulo-lista">
+        <h2 class="bloque__titulo" id="titulo-lista">Tareas</h2>
+        <div id="lista" aria-live="polite"></div>
+      </section>
+
+      <!-- Categorías -->
+      <section class="bloque" aria-labelledby="titulo-categorias">
+        <h2 class="bloque__titulo" id="titulo-categorias">Categorías</h2>
+
+        <form class="formulario formulario--linea" id="form-categoria" novalidate>
+          <div class="campo">
+            <label for="cat-nombre">Nombre</label>
+            <input type="text" id="cat-nombre" maxlength="60" required />
+            <p class="campo__error" id="error-nombre"></p>
+          </div>
+
+          <div class="campo campo--color">
+            <label for="cat-color">Color</label>
+            <input type="color" id="cat-color" value="#0040ff" />
+          </div>
+
+          <div class="formulario__acciones">
+            <button class="boton boton--principal" type="submit">Añadir categoría</button>
+          </div>
+        </form>
+
+        <ul class="categorias" id="lista-categorias"></ul>
+      </section>
+    </main>
+
+    <footer class="pie">
+      <p>API REST en PHP · Base de datos MySQL</p>
+    </footer>
+
+    <script src="/assets/app.js" type="module"></script>
+  </body>
+</html>

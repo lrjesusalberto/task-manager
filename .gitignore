@@ -1,0 +1,13 @@
+# Configuración local con credenciales
+.env
+
+# Base de datos de desarrollo
+database/*.sqlite
+database/*.sqlite-journal
+
+# Dependencias
+/vendor
+
+# Sistema
+.DS_Store
+Thumbs.db
