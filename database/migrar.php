@@ -51,16 +51,6 @@ printf(
     $clave === null || $clave === '' ? '(vacía)' : '(definida)',
 );
 
-// Sin openssl, mysqlnd no negocia caching_sha2_password (el metodo por
-// defecto de MySQL 8) y la conexion muere en el handshake.
-printf(
-    "Extensiones: pdo=%s openssl=%s sodium=%s
-",
-    implode(',', PDO::getAvailableDrivers()),
-    extension_loaded('openssl') ? 'si' : 'NO',
-    extension_loaded('sodium') ? 'si' : 'NO',
-);
-
 if ($host === null || $host === '') {
     fwrite(STDERR, "No hay host de base de datos configurado.
 ");
@@ -69,23 +59,38 @@ if ($host === null || $host === '') {
     exit(1);
 }
 
-try {
-    $pdo = Database::conexion();
+// La base de datos puede tardar unos segundos en aceptar conexiones cuando
+// ambos servicios arrancan a la vez, asi que se reintenta antes de rendirse.
+$intentos = 10;
+$espera = 2;
 
-    foreach (array_filter(array_map('trim', explode(';', (string) file_get_contents($esquema)))) as $sentencia) {
-        $pdo->exec($sentencia);
+for ($intento = 1; $intento <= $intentos; $intento++) {
+    try {
+        $pdo = Database::conexion();
+
+        foreach (array_filter(array_map('trim', explode(';', (string) file_get_contents($esquema)))) as $sentencia) {
+            $pdo->exec($sentencia);
+        }
+
+        echo "Tablas verificadas correctamente.
+";
+        exit(0);
+    } catch (Throwable $e) {
+        if ($intento < $intentos) {
+            printf("Intento %d/%d fallido, reintentando en %ds...
+", $intento, $intentos, $espera);
+            sleep($espera);
+            continue;
+        }
+
+        fwrite(STDERR, 'Error al preparar la base de datos: ' . $e->getMessage() . PHP_EOL);
+
+        // La causa real (host inalcanzable, credenciales, permisos) viaja en
+        // la excepcion anterior; sin mostrarla el log no diagnostica nada.
+        for ($causa = $e->getPrevious(); $causa !== null; $causa = $causa->getPrevious()) {
+            fwrite(STDERR, 'Causa: ' . $causa->getMessage() . PHP_EOL);
+        }
+
+        exit(1);
     }
-
-    echo "Tablas verificadas correctamente.\n";
-    exit(0);
-} catch (Throwable $e) {
-    fwrite(STDERR, 'Error al preparar la base de datos: ' . $e->getMessage() . PHP_EOL);
-
-    // La causa real (host inalcanzable, credenciales, permisos) viaja en la
-    // excepcion anterior; sin mostrarla el log no permite diagnosticar nada.
-    for ($causa = $e->getPrevious(); $causa !== null; $causa = $causa->getPrevious()) {
-        fwrite(STDERR, 'Causa: ' . $causa->getMessage() . PHP_EOL);
-    }
-
-    exit(1);
 }
