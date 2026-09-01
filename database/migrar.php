@@ -69,6 +69,13 @@ try {
     echo "Tablas verificadas correctamente.\n";
     exit(0);
 } catch (Throwable $e) {
-    fwrite(STDERR, 'Error al preparar la base de datos: ' . $e->getMessage() . "\n");
+    fwrite(STDERR, 'Error al preparar la base de datos: ' . $e->getMessage() . PHP_EOL);
+
+    // La causa real (host inalcanzable, credenciales, permisos) viaja en la
+    // excepcion anterior; sin mostrarla el log no permite diagnosticar nada.
+    for ($causa = $e->getPrevious(); $causa !== null; $causa = $causa->getPrevious()) {
+        fwrite(STDERR, 'Causa: ' . $causa->getMessage() . PHP_EOL);
+    }
+
     exit(1);
 }
